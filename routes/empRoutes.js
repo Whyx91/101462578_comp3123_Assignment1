@@ -1,18 +1,23 @@
+// In your routes file, e.g., empRoutes.js
 const express = require('express');
-const {
-    getAllEmployees,
-    createEmployee,
-    getEmployeeById,
-    updateEmployee,
-    deleteEmployee
-} = require('../controllers/empController');
 const router = express.Router();
+const Employee = require('../models/employee'); // Adjust path if necessary
 
-router.get('/employees', getAllEmployees);
-router.post('/employees', createEmployee);
-router.get('/employees/:eid', getEmployeeById);
-router.put('/employees/:eid', updateEmployee);
-router.delete('/employees/:eid', deleteEmployee);
+// Delete Employee by ID
+router.delete('/employees/:id', async (req, res) => {
+  try {
+    const employeeId = req.params.id.trim(); // Trim any whitespace from the ID
+    
+    const deletedEmployee = await Employee.findByIdAndDelete(employeeId);
 
+    if (!deletedEmployee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    res.json({ message: 'Employee deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;

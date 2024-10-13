@@ -1,14 +1,22 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 
-// Sign up logic
 exports.signup = async (req, res) => {
     try {
         const { username, email, password } = req.body;
+        if (!username || !email || !password) {
+            return res.status(400).json({ status: false, message: 'Please provide username, email, and password.' });
+        }
+
+        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+        if (existingUser) {
+            return res.status(400).json({ status: false, message: 'User already exists.' });
+        }
+
         const newUser = await User.create({ username, email, password });
         res.status(201).json({ message: 'User created successfully.', user_id: newUser._id });
     } catch (error) {
-        res.status(400).json({ status: false, message: 'Error creating user.' });
+        res.status(400).json({ status: false, message: `Error creating user: ${error.message}` });
     }
 };
 
